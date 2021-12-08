@@ -153,13 +153,15 @@ public class UsuarioDAO {
      */
     public Usuario autenticar(Usuario usuario) {
 
-        String sql = "SELECT * FROM cliente where senha=?";
+        String sql = "SELECT * FROM cliente where senha=? AND cpf=?";
         Usuario retorno = null;
 
         PreparedStatement pst = Conexao.getPreparedStatement(sql);
         try {
 
+            assert pst != null;
             pst.setString(1, usuario.getSenha());
+            pst.setString(2, usuario.getCpf());
 
             if (usuario.getSenha().length() >= 6) {
                 ResultSet res = pst.executeQuery();

@@ -10,20 +10,14 @@ import modelo2.Pix;
 import modelo2.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class ProjetoControle {
-
-    @RequestMapping("/")
-    public String welcome() {
-        return "seja bem-vindo";
-    }
-
-    @GetMapping("/deuBom")
-    public ResponseEntity verificarConectividade() {
-        return new ResponseEntity(HttpStatus.OK);
-    }
 
 
     @PostMapping(value = "/addUsuarioBD", consumes = "application/json", produces = "application/json")
@@ -139,15 +133,13 @@ public class ProjetoControle {
     }
 
     @PostMapping(value = "/autenticarUserBD", consumes = "application/json", produces = "application/json")
-    public String AltenticarUserBD(@RequestBody Usuario user) {
+    public Usuario AltenticarUserBD(@RequestBody Usuario user) {
         UsuarioDAO dao = new UsuarioDAO();
-        Usuario userPrint = dao.autenticar(user);
-        Gson g = new Gson();
-        return g.toJson(userPrint);
+        return dao.autenticar(user);
     }
 
     @PostMapping(value = "/transacaoPix", consumes = "application/json", produces = "application/json")
-    public String transacaoPix(@RequestBody Usuario user) {
+    public String transacaoPix(@RequestBody Usuario user, int valor, String pix) {
         PixDAO dao = new PixDAO();
         String userPrint = dao.transferenciaPix(user, pix, valor);
         Gson g = new Gson();
