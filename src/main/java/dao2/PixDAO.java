@@ -1,5 +1,6 @@
 package dao2;
 
+import modelo2.Extrato;
 import modelo2.Pix;
 import modelo2.Usuario;
 
@@ -94,8 +95,7 @@ public class PixDAO {
     public String transferenciaPix(Usuario trans1, String pix, int transacao) {
 
         int saldoTrans1 = Integer.parseInt(trans1.getSaldo());
-        if ( saldoTrans1 >= transacao) {
-            System.out.printf("entrou");
+        if (saldoTrans1 >= transacao && transacao <= 1000) {
             Pix obj = new Pix();
             obj.setPix_key(pix);
             obj = buscarPix(obj);
@@ -104,7 +104,6 @@ public class PixDAO {
 
             Usuario usuarioTrans = new UsuarioDAO().buscar(aux);
             if (usuarioTrans != null) {
-                System.out.printf("entrou");
 
                 int saldoUsuaioTrans = Integer.parseInt(usuarioTrans.getSaldo());
                 saldoTrans1 = saldoTrans1 - transacao;
@@ -116,10 +115,17 @@ public class PixDAO {
 
                 atualizarSaldoPix(trans1);
                 atualizarSaldoPix(usuarioTrans);
+
+                Extrato extratoTrans1 = new Extrato(trans1.getCpf(), ("Valor da transação: " + transacao + " / " + " para " + usuarioTrans.getName() + " cpf: " + usuarioTrans.getCpf()));
+                Extrato extratoUsuarioTrans = new Extrato(usuarioTrans.getCpf(), ("Valor recebido da transação: " + transacao + " / " + " de " + trans1.getName() + " cpf: " + trans1.getCpf()));
+                ExtratoDAO ext = new ExtratoDAO();
+                ext.cadastrarExtrato(extratoTrans1);
+                ext.cadastrarExtrato(extratoUsuarioTrans);
+
             }
 
-        }else{
-            System.out.printf("SALDO INSIFUCIENTE!!");
+        } else {
+            System.out.printf("SALDO INSIFUCIENTE ou a Transação excede 1000 mil reais!!");
         }
 
         return "retorno";

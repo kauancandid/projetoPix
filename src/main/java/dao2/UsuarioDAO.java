@@ -7,7 +7,6 @@
 package dao2;
 
 
-import modelo2.Extrato;
 import modelo2.Usuario;
 
 import java.sql.PreparedStatement;
@@ -52,36 +51,22 @@ public class UsuarioDAO {
         return retorno;
     }
 
-    public boolean cadastrarExtrato(Extrato extrato) {
-        String sql = "INSERT INTO extrato(conta_id,value_string) VALUES(?,?)";
-
-        Boolean retorno = false;
-        PreparedStatement pst = Conexao.getPreparedStatement(sql);
-        try {
-            pst.setString(1, extrato.getConta_id());
-            pst.setString(2, extrato.getValue_string());
-
-            if (pst.executeUpdate() > 0) {
-                retorno = true;
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(UsuarioDAO.class.getName()).log(Level.SEVERE, null, ex);
-            retorno = false;
-        }
-        return retorno;
-    }
-
     public boolean atualizar(Usuario usuario) {
-        String sql = "UPDATE cliente set name=?,cpf=?, email=?, banco=?, senha=?, saldo=?";
+
+        String sql = "UPDATE cliente set name=?, email=?, senha=? WHERE cpf=?";
+
+
         Boolean retorno = false;
         PreparedStatement pst = Conexao.getPreparedStatement(sql);
         try {
             pst.setString(1, usuario.getName());
-            pst.setString(2, usuario.getCpf());
-            pst.setString(3, usuario.getEmail());
-            pst.setString(4, usuario.getBanco());
-            pst.setString(5, usuario.getSenha());
-            pst.setString(6, usuario.getSaldo());
+            pst.setString(2, usuario.getEmail());
+            pst.setString(3, usuario.getSenha());
+            //banco
+            pst.setString(4, usuario.getCpf());
+            //saldo
+
+
             if (pst.executeUpdate() > 0) {
                 retorno = true;
             }
@@ -93,6 +78,7 @@ public class UsuarioDAO {
     }
 
     public boolean excluir(Usuario usuario) {
+        new PixDAO().excluirPix(usuario);
         String sql = "DELETE FROM cliente where cpf=?";
         Boolean retorno = false;
         PreparedStatement pst = Conexao.getPreparedStatement(sql);

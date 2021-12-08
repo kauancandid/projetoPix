@@ -1,6 +1,7 @@
 package com.meuprojeto.meuprimeiroprojeto;
 
 import com.google.gson.Gson;
+import dao2.ExtratoDAO;
 import dao2.PixDAO;
 import dao2.UsuarioDAO;
 import modelo.Usuario0;
@@ -43,6 +44,24 @@ public class ProjetoControle {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
 
+    @PostMapping(value = "/atualizarUsuarioBD", consumes = "application/json", produces = "application/json")
+    public ResponseEntity atualizarUsuarioBD(@RequestBody String content) {
+        Gson g = new Gson();
+
+        System.out.println(content);
+        Usuario user = (Usuario) g.fromJson(content, Usuario.class);
+
+        System.out.println(user.getName());
+        System.out.println(user.getEmail());
+
+        boolean confirmou = new UsuarioDAO().atualizar(user);
+
+        if (confirmou)
+            return new ResponseEntity(HttpStatus.OK);
+        else
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+    }
+
     @PostMapping(value = "/addPixBD", consumes = "application/json", produces = "application/json")
     public ResponseEntity cadastroPix(@RequestBody String content) {
         Gson g = new Gson();
@@ -71,7 +90,7 @@ public class ProjetoControle {
         System.out.println(ext.getConta_id());
         System.out.println(ext.getValue_string());
 
-        boolean confirmou = new UsuarioDAO().cadastrarExtrato(ext);
+        boolean confirmou = new ExtratoDAO().cadastrarExtrato(ext);
 
         if (confirmou)
             return new ResponseEntity(HttpStatus.OK);
@@ -111,7 +130,7 @@ public class ProjetoControle {
 
     }
 
-    @PostMapping(value = "/BuscarUser", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/BuscarUsuarioBD", consumes = "application/json", produces = "application/json")
     public String BuscarUserBD(@RequestBody Usuario user) {
         UsuarioDAO dao = new UsuarioDAO();
         Usuario userPrint = dao.buscar(user);
@@ -130,10 +149,21 @@ public class ProjetoControle {
     @PostMapping(value = "/transacaoPix", consumes = "application/json", produces = "application/json")
     public String transacaoPix(@RequestBody Usuario user) {
         PixDAO dao = new PixDAO();
-        String userPrint = dao.transferenciaPix(user, "12345678", 100);
+        String userPrint = dao.transferenciaPix(user, pix, valor);
         Gson g = new Gson();
         return g.toJson(userPrint);
     }
 
+    @PostMapping(value = "/emitirExtrato", consumes = "application/json", produces = "application/json")
+    public String emitirExtrato(@RequestBody Usuario usuario) {
+        ExtratoDAO dao = new ExtratoDAO();
+        List<Extrato> user =  dao.emitirExtrato(usuario);
+        Gson g = new Gson();
 
+        for (Extrato u : user) {
+            System.out.println(u.getValue_string());
+        }
+        return g.toJson(user);
+
+    }
 }
