@@ -7,6 +7,7 @@
 package dao2;
 
 
+import modelo2.Extrato;
 import modelo2.Usuario;
 
 import java.sql.PreparedStatement;
@@ -19,11 +20,6 @@ import java.util.logging.Logger;
 
 
 public class UsuarioDAO {
-    /*
-     * To change this license header, choose License Headers in Project Properties.
-     * To change this template file, choose Tools | Templates
-     * and open the template in the editor.
-     */
 
     public UsuarioDAO() {
 
@@ -33,6 +29,7 @@ public class UsuarioDAO {
         String sql = "INSERT INTO cliente(name,cpf,email,banco,senha,saldo) VALUES(?,?,?,?,?,?)";
         Boolean retorno = false;
         PreparedStatement pst = Conexao.getPreparedStatement(sql);
+
         try {
             pst.setString(1, usuario.getName());
             pst.setString(2, usuario.getCpf());
@@ -54,10 +51,9 @@ public class UsuarioDAO {
     public boolean atualizar(Usuario usuario) {
 
         String sql = "UPDATE cliente set name=?, email=?, senha=? WHERE cpf=?";
-
-
         Boolean retorno = false;
         PreparedStatement pst = Conexao.getPreparedStatement(sql);
+
         try {
             pst.setString(1, usuario.getName());
             pst.setString(2, usuario.getEmail());
@@ -65,7 +61,6 @@ public class UsuarioDAO {
             //banco
             pst.setString(4, usuario.getCpf());
             //saldo
-
 
             if (pst.executeUpdate() > 0) {
                 retorno = true;
@@ -118,12 +113,11 @@ public class UsuarioDAO {
         return retorno;
     }
 
-
     public Usuario buscar(Usuario usuario) {
         String sql = "SELECT * FROM cliente where cpf=?";
         Usuario retorno = null;
-
         PreparedStatement pst = Conexao.getPreparedStatement(sql);
+
         try {
 
             pst.setString(1, usuario.getCpf());
@@ -152,13 +146,11 @@ public class UsuarioDAO {
      * @return
      */
     public Usuario autenticar(Usuario usuario) {
-
         String sql = "SELECT * FROM cliente where senha=? AND cpf=?";
         Usuario retorno = null;
-
         PreparedStatement pst = Conexao.getPreparedStatement(sql);
-        try {
 
+        try {
             assert pst != null;
             pst.setString(1, usuario.getSenha());
             pst.setString(2, usuario.getCpf());
@@ -168,7 +160,7 @@ public class UsuarioDAO {
 
                 if (res.next()) {
                     retorno = new Usuario();
-                    System.out.printf("Você foi autenticado");
+                    System.out.printf("Usuario foi autenticado");
                     retorno.setName(res.getString("name"));
                     retorno.setCpf(res.getString("cpf"));
                     retorno.setEmail(res.getString("email"));
@@ -181,8 +173,48 @@ public class UsuarioDAO {
             }
 
         } catch (SQLException ex) {
-            System.out.println("Senha incorreta, verifique se ela tem 6 digitos!");
+            System.out.println("Usuario não foi autenticado!");
         }
         return retorno;
+    }
+
+    public boolean atualizarSaldo(Usuario usuario) {
+        String sql = "UPDATE cliente set saldo=? WHERE cpf=?";
+        Boolean retorno = false;
+        PreparedStatement pst = Conexao.getPreparedStatement(sql);
+        try {
+            pst.setString(1, usuario.getSaldo());
+            pst.setString(2, usuario.getCpf());
+            if (pst.executeUpdate() > 0) {
+                retorno = true;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAO.class.getName()).log(Level.SEVERE, null, ex);
+            retorno = false;
+        }
+        return retorno;
+    }
+
+    public String depositar(Usuario trans1, int transacao) {
+        Usuario user = autenticar(trans1);
+        String extrato = "";
+
+        if (user != null) {
+            System.out.println("Usuario autenticado");
+            int saldoTrans1 = Integer.parseInt(user.getSaldo());
+
+            if (transacao <= 1000) {
+                saldoTrans1 = saldoTrans1 + transacao;
+                user.setSaldo(String.valueOf(saldoTrans1));
+                Extrato extratoTrans1 = new Extrato(user.getCpf(), ("Valor depositado: " + transacao + " banco: " + user.getBanco()));
+                ExtratoDAO ext = new ExtratoDAO();
+                ext.cadastrarExtrato(extratoTrans1);
+                extrato = extratoTrans1.getValue_string();
+                atualizarSaldo(user);
+            } else {
+                System.out.printf("VALOR DO DEPOSITO NEGATIVO ou a Transação excede 1000 mil reais!!");
+            }
+        }
+        return "Deposito Concluida com Sucesso " + extrato;
     }
 }

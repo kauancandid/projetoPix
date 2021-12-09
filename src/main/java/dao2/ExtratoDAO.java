@@ -47,7 +47,7 @@ public class ExtratoDAO {
             pst.setString(1, usuario.getCpf());
             ResultSet res = pst.executeQuery();
             while (res.next()) {
-                Extrato item = new Extrato(res.getString("conta_id"), res.getString("value_string") );
+                Extrato item = new Extrato(res.getString("conta_id"), res.getString("value_string"));
                 retorno.add(item);
             }
 
